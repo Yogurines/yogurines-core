@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yogurines VI · Propuesta del menú principal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b100d;--panel:#141b17;--panel2:#1b241f;--line:#050806;--hi:#2a3a31;--txt:#e4efe7;--mut:#93a89a;--acc:#4dff88;--acc2:#5ad1ff;--sel:#c9ff4a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:'Pixelify Sans',system-ui,sans-serif;font-size:17px;line-height:1.45;
+    background-image:linear-gradient(rgba(77,255,136,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(77,255,136,.035) 1px,transparent 1px);background-size:16px 16px}
+  canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+  h1,h2,h3{font-family:'Silkscreen',monospace;font-weight:400;letter-spacing:.5px}
+  header{padding:30px 20px 10px;text-align:center}
+  header h1{font-size:clamp(24px,4.6vw,40px);margin:6px 0;color:#fff;text-shadow:3px 3px 0 #0d3a1e}
+  header p{max-width:820px;margin:6px auto;color:var(--mut)}
+  main{max-width:1180px;margin:0 auto;padding:0 16px 140px}
+  section{background:var(--panel);border:3px solid var(--line);box-shadow:inset 3px 3px 0 var(--hi),inset -3px -3px 0 #0a0f0c;padding:22px 22px 26px;margin:26px 0}
+  section>h2{margin:0 0 4px;font-size:22px;color:#fff}
+  section>.sub{color:var(--mut);margin:0 0 16px}
+  .num{display:inline-block;background:var(--acc);color:#06210f;padding:0 8px;margin-right:10px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .grid.names{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .opt{background:var(--panel2);border:3px solid var(--line);box-shadow:inset 2px 2px 0 #2c3b33,inset -2px -2px 0 #0e1411;padding:12px;cursor:pointer;position:relative;transition:transform .08s}
+  .opt:hover{transform:translateY(-2px)}
+  .opt.sel{border-color:var(--sel);box-shadow:0 0 0 2px var(--sel),inset 2px 2px 0 #2c3b33}
+  .opt.sel::after{content:'ELEGIDO';position:absolute;top:-12px;right:10px;background:var(--sel);color:#1d2600;font-family:'Silkscreen';font-size:12px;padding:1px 8px}
+  .opt h3{margin:8px 0 2px;font-size:16px;color:#fff}
+  .opt p{margin:0;color:var(--mut);font-size:14.5px}
+  .opt canvas{width:100%;height:auto;border:2px solid #050806}
+  .tag{display:inline-block;font-family:'Silkscreen';font-size:11px;background:#1f6b3c;color:#d9ffe6;padding:1px 6px;margin-left:6px;vertical-align:middle}
+  .note{background:#0f1612;border-left:6px solid var(--acc2);padding:10px 14px;margin:14px 0 0;color:#cfe3d6;font-size:15px}
+  .note.warn{border-color:#e0a028}
+  #prevwrap{position:relative;max-width:960px;margin:0 auto}
+  #prev{width:100%;height:auto;border:3px solid #050806;cursor:default;outline:none}
+  #prev:focus{box-shadow:0 0 0 2px #1f6b3c}
+  .bar{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin:12px 0 0;font-size:14px;color:var(--mut)}
+  .bar b{color:#fff;font-weight:600}
+  .chip{font-family:'Silkscreen';font-size:12px;background:#0f1612;border:2px solid #2a3a31;padding:2px 8px;color:#bfe9cf}
+  .hint{text-align:center;color:#bfe9cf;font-size:15px;margin-top:8px}
+  small.k{font-family:'Silkscreen';font-size:12px;background:#000;border:2px solid #3b5446;padding:0 5px;color:#eee}
+  .row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+  #summary{position:fixed;left:0;right:0;bottom:0;background:#070b09ee;border-top:3px solid #050806;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
+  #summary .count{font-family:'Silkscreen';font-size:14px}
+  .btn{font-family:'Silkscreen';font-size:14px;padding:8px 16px;border:3px solid #050806;background:#c6c6c6;color:#222;cursor:pointer;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #555}
+  .btn.green{background:#2fae5a;color:#fff;box-shadow:inset 2px 2px 0 #7ff0a4,inset -2px -2px 0 #145a2c}
+  #out{width:100%;display:none;background:#050806;color:#cde;border:3px solid #050806;font-family:monospace;font-size:13px;min-height:200px;padding:10px}
+  #outwrap{max-width:1180px;margin:0 auto 20px;padding:0 16px}
+  .steps{margin:8px 0 0;padding-left:20px;color:#cfe3d6;font-size:15px}
+  .steps li{margin:3px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Yogurines VI · Menú principal</h1>
+  <p>Propuesta para el mod nuevo de estilo del server: menú principal tecnológico con las estatuas de metal de los tres fundadores, botones, modo desarrollador escondido y un retoque suave de la pausa y los ajustes. Toca las opciones de abajo y la vista previa cambia al momento. Cuando lo tengas, dale a "Copiar mis elecciones" y pégamelo en el chat.</p>
+</header>
+<main>
+
+<section>
+  <h2><span class="num">▶</span>Vista previa en vivo</h2>
+  <p class="sub">Es interactiva: pasa el ratón por los botones y haz clic. Muestra lo que tengas elegido abajo (si no eliges nada, enseña la primera opción de cada grupo).</p>
+  <div id="prevwrap"><canvas id="prev" width="480" height="270" tabindex="0"></canvas></div>
+  <div class="bar" id="curbar"></div>
+  <div class="hint">Modo desarrollador de prueba: haz <b>5 clics en el "VI"</b>, pulsa <small class="k">Ctrl</small>+<small class="k">Shift</small>+<small class="k">D</small> con la vista previa seleccionada, o mantén pulsado el engranaje 3 segundos. Contraseña de prueba: <b>yogur</b></div>
+</section>
+
+<section>
+  <h2><span class="num">1</span>Nombre de la edición</h2>
+  <p class="sub">Los Yogurines V fue "La Redención". Para la VI, nombres con aire tecnológico. Al elegir uno aparece bajo el logo en la vista previa.</p>
+  <div class="grid names" data-group="Nombre" data-key="name">
+    <div class="opt" data-val="La Forja"><h3>La Forja</h3><p>Donde se funde el nuevo mundo. Encaja con las estatuas forjadas en metal.</p></div>
+    <div class="opt" data-val="El Protocolo"><h3>El Protocolo</h3><p>Suena a sistema secreto que se activa.</p></div>
+    <div class="opt" data-val="Singularidad"><h3>Singularidad</h3><p>El momento en que las máquinas despiertan.</p></div>
+    <div class="opt" data-val="Código Verde"><h3>Código Verde</h3><p>Juega con el verde de la edición y el código hackeado.</p></div>
+    <div class="opt" data-val="El Reinicio"><h3>El Reinicio</h3><p>Tras la Redención, el sistema arranca de cero.</p></div>
+    <div class="opt" data-val="Sobrecarga"><h3>Sobrecarga</h3><p>Energía al límite, cables a punto de reventar.</p></div>
+    <div class="opt" data-val="El Núcleo"><h3>El Núcleo</h3><p>El corazón del reactor que mueve el server.</p></div>
+    <div class="opt" data-val="Overclock"><h3>Overclock</h3><p>En inglés, corto y con fuerza: llevar la máquina más allá.</p></div>
+    <div class="opt" data-val="Otro (te lo digo en el chat)"><h3>Otro</h3><p>Tienes otra idea: dímela en el chat.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">2</span>Fondo</h2>
+  <p class="sub">Los tres llevan las estatuas de los fundadores en el centro, todo en pixel art estilo Minecraft y animado (luces, cables con pulsos de energía, chispas).</p>
+  <div class="grid" data-group="Fondo" data-key="bg">
+    <div class="opt" data-val="A"><canvas class="th" data-k="bg" data-v="A" width="480" height="270"></canvas><h3>A · La forja</h3><p>Sala industrial con un gran anillo-reactor verde detrás de las estatuas, cables colgando del techo con pulsos de luz y chispas subiendo.</p></div>
+    <div class="opt" data-val="B"><canvas class="th" data-k="bg" data-v="B" width="480" height="270"></canvas><h3>B · Núcleo hackeado</h3><p>Lluvia de código verde, suelo de rejilla que avanza, la Y gigante en holograma y pedestales holográficos. Algún fallo visual suave de vez en cuando.</p></div>
+    <div class="opt" data-val="C"><canvas class="th" data-k="bg" data-v="C" width="480" height="270"></canvas><h3>C · Sala de servidores</h3><p>Pasillo de racks con luces que parpadean, bandejas de cables en el techo y una puerta de luz al fondo.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">3</span>Metal de las estatuas</h2>
+  <p class="sub">Hechas a partir de vuestras skins reales, posadas como el billete de 500: Samu señalando al frente, Yotu con el brazo en alto y Metta con los brazos cruzados.</p>
+  <div class="grid" data-group="Estatuas" data-key="mat">
+    <div class="opt" data-val="acero"><canvas class="mt" data-v="acero" width="360" height="220"></canvas><h3>Acero pulido</h3><p>Gris metálico limpio, se leen los detalles de cada skin. Reflejo verde de la sala en los bordes.</p></div>
+    <div class="opt" data-val="titanio"><canvas class="mt" data-v="titanio" width="360" height="220"></canvas><h3>Titanio con vetas de energía</h3><p>Metal casi negro y las partes claras de la skin (ojos, la araña, la camisa) brillan en verde como circuitos.</p></div>
+    <div class="opt" data-val="cromo"><canvas class="mt" data-v="cromo" width="360" height="220"></canvas><h3>Cromo</h3><p>Plateado brillante, muy de trofeo. Destaca mucho sobre los fondos oscuros.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">4</span>Logo "Los Yogurines VI"</h2>
+  <p class="sub">El VI va siempre en números romanos y en verde. El nombre de la edición va debajo.</p>
+  <div class="grid" data-group="Logo" data-key="logo">
+    <div class="opt" data-val="A"><canvas class="lg" data-v="A" width="300" height="90"></canvas><h3>A · Metal extruido</h3><p>Letras de acero en relieve como el logo de Minecraft, con el VI verde que late suave.</p></div>
+    <div class="opt" data-val="B"><canvas class="lg" data-v="B" width="300" height="90"></canvas><h3>B · Neón con glitch</h3><p>Verde neón con borde de colores desplazado y un pequeño fallo de señal cada pocos segundos.</p></div>
+    <div class="opt" data-val="C"><canvas class="lg" data-v="C" width="300" height="90"></canvas><h3>C · Placa de circuito</h3><p>Letras oscuras con contorno verde y puntos de circuito por dentro, el VI al rojo blanco.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">5</span>Botones</h2>
+  <p class="sub">Jugar grande; debajo el engranaje pequeño (ajustes de Minecraft), Salir y el + pequeño (crear o abrir un mundo en solitario). Pasa el ratón para ver cómo se iluminan.</p>
+  <div class="grid" data-group="Botones" data-key="btn">
+    <div class="opt" data-val="A"><canvas class="bt" data-v="A" width="240" height="66"></canvas><h3>A · Acero estilo Minecraft</h3><p>La forma de siempre de Minecraft en acero oscuro. Al pasar el ratón, borde y texto verdes.</p></div>
+    <div class="opt" data-val="B"><canvas class="bt" data-v="B" width="240" height="66"></canvas><h3>B · Holograma</h3><p>Fondo translúcido con contorno verde y esquinas cortadas. Al pasar, se rellena con líneas de escáner.</p></div>
+    <div class="opt" data-val="C"><canvas class="bt" data-v="C" width="240" height="66"></canvas><h3>C · Placa con LED</h3><p>Placa negra con un LED a la izquierda que se enciende y una pista de circuito que se carga.</p></div>
+  </div>
+  <div class="label" style="font-family:Silkscreen;font-size:13px;color:var(--acc);margin:18px 0 6px">Distribución</div>
+  <div class="grid" data-group="Distribución" data-key="lay">
+    <div class="opt" data-val="C"><canvas class="ly" data-v="C" width="480" height="270"></canvas><h3>Centrada</h3><p>Logo arriba, estatuas en medio y botones abajo en el centro.</p></div>
+    <div class="opt" data-val="L"><canvas class="ly" data-v="L" width="480" height="270"></canvas><h3>Lateral</h3><p>Logo y botones a la izquierda sobre un panel oscuro; las estatuas a la derecha, más grandes en pantalla.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">6</span>Modo desarrollador escondido</h2>
+  <p class="sub">Solo para vosotros: pide una contraseña y abre un editor donde cambias la IP del server a la que entra "Jugar", los textos de los botones y si se ve el +. Pruébalo en la vista previa de arriba.</p>
+  <div class="label" style="font-family:Silkscreen;font-size:13px;color:var(--acc);margin:4px 0 6px">Cómo se abre</div>
+  <div class="grid" data-group="Abrir modo desarrollador" data-key="dev">
+    <div class="opt" data-val="A · 5 clics en el VI"><h3>A · 5 clics en el VI</h3><p>Nadie lo encuentra por casualidad y es fácil de recordar.</p></div>
+    <div class="opt" data-val="B · Ctrl+Shift+D"><h3>B · Ctrl + Shift + D</h3><p>Combinación de teclas en el menú. Invisible del todo.</p></div>
+    <div class="opt" data-val="C · Mantener el engranaje 3 s"><h3>C · Mantener el engranaje 3 segundos</h3><p>Un clic normal abre los ajustes; mantenerlo abre la contraseña.</p></div>
+  </div>
+  <div class="label" style="font-family:Silkscreen;font-size:13px;color:var(--acc);margin:18px 0 6px">Cómo llega la IP a todos los jugadores</div>
+  <div class="grid" data-group="IP del server" data-key="ipsrc">
+    <div class="opt" data-val="Archivo online en GitHub (recomendado)"><h3>Online en GitHub <span class="tag">RECOMENDADO</span></h3><p>El modo desarrollador guarda la IP en un archivo de vuestro GitHub y el mod lo lee al abrir el juego. Cambias la IP una vez y les llega a todos sin tocar el modpack. Si no hay internet, usa la última que conocía.</p></div>
+    <div class="opt" data-val="Solo en el config del modpack"><h3>Solo en el config</h3><p>La IP se guarda en el archivo de configuración del PC. Para que les llegue a los demás tienes que exportar el modpack otra vez con ese config.</p></div>
+  </div>
+  <div class="note">La contraseña no se guarda en texto plano dentro del mod (va cifrada con un hash), así que aunque alguien abra el .jar no la puede leer.</div>
+</section>
+
+<section>
+  <h2><span class="num">7</span>Pausa y ajustes: retoque suave</h2>
+  <p class="sub">Mismos botones y misma colocación que en Minecraft normal, solo con un toque del estilo VI. Pasa el ratón por los botones.</p>
+  <div class="grid" data-group="Menú de pausa" data-key="pause">
+    <div class="opt" data-val="A · Vanilla con verde"><canvas class="pz" data-v="A" width="240" height="160"></canvas><h3>A · Vanilla con verde</h3><p>Idénticos a los de Minecraft; solo cambia el borde al pasar el ratón: verde en vez de blanco.</p></div>
+    <div class="opt" data-val="B · Vanilla oscuro"><canvas class="pz" data-v="B" width="240" height="160"></canvas><h3>B · Vanilla oscuro</h3><p>La misma textura de piedra pero más oscura y un poco verdosa, a juego con el menú.</p></div>
+    <div class="opt" data-val="C · Acero con esquinas"><canvas class="pz" data-v="C" width="240" height="160"></canvas><h3>C · Acero con esquinas</h3><p>Forma vanilla en acero, con esquinitas verdes y una línea verde bajo el título.</p></div>
+  </div>
+  <div class="label" style="font-family:Silkscreen;font-size:13px;color:var(--acc);margin:18px 0 6px">Fondo de las pantallas de ajustes (el de tierra)</div>
+  <div class="grid" data-group="Fondo de ajustes" data-key="optbg">
+    <div class="opt" data-val="Tierra de siempre"><canvas class="ob" data-v="dirt" width="240" height="135"></canvas><h3>Tierra de siempre</h3><p>Se queda como en Minecraft.</p></div>
+    <div class="opt" data-val="Placas de metal"><canvas class="ob" data-v="metal" width="240" height="135"></canvas><h3>Placas de metal</h3><p>Baldosas de metal oscuro con remaches.</p></div>
+    <div class="opt" data-val="Rejilla verde"><canvas class="ob" data-v="grid" width="240" height="135"></canvas><h3>Rejilla verde</h3><p>Fondo casi negro con una rejilla verde muy tenue.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">8</span>El mod y dónde vive</h2>
+  <p class="sub">Es un mod aparte, solo para el cliente: va en el modpack de cada jugador y el servidor no lo necesita. Forge 1.20.1, igual que el otro.</p>
+  <div class="grid" data-group="Nombre del mod" data-key="modname">
+    <div class="opt" data-val="Yogurines Menú"><h3>Yogurines Menú</h3><p>Directo: es el menú y el estilo del server.</p></div>
+    <div class="opt" data-val="Yogurines Estilo"><h3>Yogurines Estilo</h3><p>Más general, por si luego mete más cosas visuales (pantalla de carga, iconos...).</p></div>
+    <div class="opt" data-val="Yogurines Core"><h3>Yogurines Core</h3><p>Suena a mod base del server, donde irá todo lo común.</p></div>
+  </div>
+  <div class="label" style="font-family:Silkscreen;font-size:13px;color:var(--acc);margin:18px 0 6px">Repositorio</div>
+  <div class="grid" data-group="Repositorio" data-key="repo">
+    <div class="opt" data-val="Repo nuevo en la organización Yogurines (recomendado)"><h3>Repo nuevo en Yogurines <span class="tag">RECOMENDADO</span></h3><p>Un repo propio dentro de vuestra organización, con su propio .jar en Releases igual que el mod del móvil. Tendrás que crearlo tú vacío en GitHub (te digo cómo) para que yo pueda subir el código.</p></div>
+    <div class="opt" data-val="Dentro del repo yogurines-mod"><h3>En el repo actual</h3><p>Mismo repo que el móvil, y cada build saca dos .jar. Más cómodo de montar, pero mezcla los dos mods.</p></div>
+  </div>
+</section>
+
+</main>
+<div id="outwrap"><textarea id="out" readonly></textarea></div>
+<div id="summary"><span class="count" id="count"></span><button class="btn green" id="copy">Copiar mis elecciones</button><button class="btn" id="show">Ver texto</button></div>
+
+<script>
+const STAT=/*STATUES*/;
+const W=480,H=270;
+const ST={name:'La Forja',bg:'A',mat:'titanio',logo:'A',btn:'A',lay:'C',dev:'A',pause:'A',optbg:'dirt'};
+const CH={};
+const IMG={};
+let ready=0;
+for(const k in STAT){const im=new Image();im.onload=()=>{ready++};im.src=STAT[k];IMG[k]=im}
+
+// ---------------- pixel font ----------------
+const F={
+A:[".###.","#...#","#...#","#####","#...#","#...#","#...#"],B:["####.","#...#","####.","#...#","#...#","#...#","####."],C:[".###.","#...#","#....","#....","#....","#...#",".###."],
+D:["####.","#...#","#...#","#...#","#...#","#...#","####."],E:["#####","#....","###..","#....","#....","#....","#####"],F:["#####","#....","###..","#....","#....","#....","#...."],
+G:[".####","#....","#..##","#...#","#...#","#...#",".###."],H:["#...#","#...#","#####","#...#","#...#","#...#","#...#"],I:["###",".#.",".#.",".#.",".#.",".#.","###"],
+J:["....#","....#","....#","....#","....#","#...#",".###."],K:["#...#","#..#.","###..","#..#.","#...#","#...#","#...#"],L:["#....","#....","#....","#....","#....","#....","#####"],
+M:["#...#","##.##","#.#.#","#...#","#...#","#...#","#...#"],N:["#...#","##..#","#.#.#","#..##","#...#","#...#","#...#"],O:[".###.","#...#","#...#","#...#","#...#","#...#",".###."],
+P:["####.","#...#","####.","#....","#....","#....","#...."],Q:[".###.","#...#","#...#","#...#","#...#","#..#.",".##.#"],R:["####.","#...#","####.","#...#","#...#","#...#","#...#"],
+S:[".####","#....",".###.","....#","....#","#...#",".###."],T:["#####","..#..","..#..","..#..","..#..","..#..","..#.."],U:["#...#","#...#","#...#","#...#","#...#","#...#",".###."],
+V:["#...#","#...#","#...#","#...#",".#.#.",".#.#.","..#.."],W:["#...#","#...#","#...#","#...#","#.#.#","##.##","#...#"],X:["#...#",".#.#.","..#..",".#.#.","#...#","#...#","#...#"],
+Y:["#...#",".#.#.","..#..","..#..","..#..","..#..","..#.."],Z:["#####","....#","...#.","..#..",".#...","#....","#####"],
+a:[".....",".....",".###.","....#",".####","#...#",".####"],b:["#....","#....","#.##.","##..#","#...#","#...#","####."],c:[".....",".....",".###.","#...#","#....","#...#",".###."],
+d:["....#","....#",".##.#","#..##","#...#","#...#",".####"],e:[".....",".....",".###.","#...#","#####","#....",".####"],f:["..##",".#..","####",".#..",".#..",".#..",".#.."],
+g:[".....",".....",".####","#...#","#...#",".####","....#","####."],h:["#....","#....","#.##.","##..#","#...#","#...#","#...#"],i:["#",".","#","#","#","#","#"],
+j:["...#","....","...#","...#","...#","...#","#..#",".##."],k:["#...","#...","#..#","#.#.","##..","#.#.","#..#"],l:["#.","#.","#.","#.","#.","#.",".#"],
+m:[".....",".....","##.#.","#.#.#","#.#.#","#...#","#...#"],n:[".....",".....","####.","#...#","#...#","#...#","#...#"],o:[".....",".....",".###.","#...#","#...#","#...#",".###."],
+p:[".....",".....","#.##.","##..#","#...#","####.","#....","#...."],q:[".....",".....",".##.#","#..##","#...#",".####","....#","....#"],r:[".....",".....","#.##.","##..#","#....","#....","#...."],
+s:[".....",".....",".####","#....",".###.","....#","####."],t:[".#.",".#.","###",".#.",".#.",".#.","..#"],u:[".....",".....","#...#","#...#","#...#","#...#",".####"],
+v:[".....",".....","#...#","#...#","#...#",".#.#.","..#.."],w:[".....",".....","#...#","#...#","#.#.#","#.#.#",".####"],x:[".....",".....","#...#",".#.#.","..#..",".#.#.","#...#"],
+y:[".....",".....","#...#","#...#","#...#",".####","....#","####."],z:[".....",".....","#####","...#.","..#..",".#...","#####"],
+'0':[".###.","#...#","#..##","#.#.#","##..#","#...#",".###."],'1':["..#..",".##..","..#..","..#..","..#..","..#..","#####"],'2':[".###.","#...#","....#","..##.",".#...","#...#","#####"],
+'3':[".###.","#...#","....#","..##.","....#","#...#",".###."],'4':["...##","..#.#",".#..#","#...#","#####","....#","....#"],'5':["#####","#....","####.","....#","....#","#...#",".###."],
+'6':["..##.",".#...","#....","####.","#...#","#...#",".###."],'7':["#####","#...#","....#","...#.","..#..","..#..","..#.."],'8':[".###.","#...#","#...#",".###.","#...#","#...#",".###."],
+'9':[".###.","#...#","#...#",".####","....#","...#.",".##.."],
+' ':["...","...","...","...","...","...","..."],'.':[".",".",".",".",".",".","#"],',':[".",".",".",".",".",".","#","#"],':':[".","#",".",".",".","#","."],
+'!':["#","#","#","#","#",".","#"],'?':[".###.","#...#","....#","...#.","..#..",".....","..#.."],'-':["....","....","....","####","....","....","...."],
+'+':[".....","..#..","..#..","#####","..#..","..#..","....."],'/':["....#","...#.","...#.","..#..",".#...",".#...","#...."],'(':["..#",".#.","#..","#..","#..",".#.","..#"],
+')':["#..",".#.","..#","..#","..#",".#.","#.."],'_':[".....",".....",".....",".....",".....",".....",".....","#####"],'=':[".....",".....","#####",".....","#####",".....","....."],
+'*':[".....","#.#.#",".###.","#####",".###.","#.#.#","....."],'>':["#...",".#..","..#.","...#","..#.",".#..","#..."],'<':["...#","..#.",".#..","#...",".#..","..#.","...#"],
+'·':[".",".",".","#",".",".","."],"'":["#","#",".",".",".",".","."],'[':["##","#.","#.","#.","#.","#.","##"],']':["##",".#",".#",".#",".#",".#","##"],
+'á':["...#.","..#..",".###.","....#",".####","#...#",".####"],'é':["...#.","..#..",".###.","#...#","#####","#....",".####"],'í':["..#",".#.",".#.",".#.",".#.",".#.",".#."],
+'ó':["...#.","..#..",".###.","#...#","#...#","#...#",".###."],'ú':["...#.","..#..","#...#","#...#","#...#","#...#",".####"],'ñ':[".##.#","#.##.","####.","#...#","#...#","#...#","#...#"],
+'¿':["..#..",".....","..#..",".#...","#....","#...#",".###."],'¡':["#",".","#","#","#","#","#"],
+'Á':["..#..",".###.","#...#","#####","#...#","#...#","#...#"],'É':["..#..","#####","#....","###..","#....","#....","#####"],'Í':[".#.","###",".#.",".#.",".#.",".#.","###"],
+'Ó':["..#..",".###.","#...#","#...#","#...#","#...#",".###."],'Ú':["..#..","#...#","#...#","#...#","#...#","#...#",".###."],'Ñ':[".##.#","#...#","##..#","#.#.#","#..##","#...#","#...#"]
+};
+function gl(ch){return F[ch]||F['?']}
+function tw(s,k=1){let w=0;for(const ch of s)w+=gl(ch)[0].length+1;return Math.max(0,w-1)*k}
+function txt(c,s,x,y,col,k=1,sh){if(sh)txt(c,s,x+k,y+k,sh,k);c.fillStyle=col;let cx=x;
+  for(const ch of s){const g=gl(ch);for(let r=0;r<g.length;r++){const row=g[r];for(let i=0;i<row.length;i++)if(row[i]==='#')c.fillRect(cx+i*k,y+r*k,k,k)}cx+=(g[0].length+1)*k}}
+function txtC(c,s,cx,y,col,k=1,sh){txt(c,s,Math.round(cx-tw(s,k)/2),y,col,k,sh)}
+
+// ---------------- helpers ----------------
+function R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
+function cv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
+function hx(h){const n=parseInt(h.slice(1,7),16);return[n>>16,(n>>8)&255,n&255]}
+function mix(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]}
+function rgb(a,al){return al===undefined?`rgb(${a[0]|0},${a[1]|0},${a[2]|0})`:`rgba(${a[0]|0},${a[1]|0},${a[2]|0},${al})`}
+function rnd(s){let x=Math.sin(s*12.9898+78.233)*43758.5453;return x-Math.floor(x)}
+class Buf{constructor(w,h){this.w=w;this.h=h;this.c=cv(w,h);this.x=this.c.getContext('2d');this.im=this.x.createImageData(w,h);this.d=this.im.data}
+  set(x,y,a){if(x<0||y<0||x>=this.w||y>=this.h)return;const i=(y*this.w+x)*4;this.d[i]=a[0];this.d[i+1]=a[1];this.d[i+2]=a[2];this.d[i+3]=255}
+  blend(x,y,a,al){if(x<0||y<0||x>=this.w||y>=this.h)return;const i=(y*this.w+x)*4;this.d[i]+= (a[0]-this.d[i])*al;this.d[i+1]+=(a[1]-this.d[i+1])*al;this.d[i+2]+=(a[2]-this.d[i+2])*al;this.d[i+3]=255}
+  done(){this.x.putImageData(this.im,0,0);return this.c}}
+function tint(src,col){const c=cv(src.width,src.height),x=c.getContext('2d');x.drawImage(src,0,0);x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,c.width,c.height);return c}
+function maskOf(s,k){const c=cv(tw(s,k)+2,9*k+2);txt(c.getContext('2d'),s,0,0,'#fff',k);return c}
+
+// ---------------- layout ----------------
+function layout(lay){
+  if(lay==='L')return{cx:372,feet:222,xs:[300,372,444],logo:{x:14,y:34,center:false},
+    btn:{play:[22,140,182,20],gear:[22,164,20,20],quit:[46,164,134,20],plus:[184,164,20,20]},panel:true,ver:[8,258]};
+  return{cx:240,feet:186,xs:[150,240,330],logo:{x:240,y:6,center:true},
+    btn:{play:[140,204,200,20],gear:[140,228,20,20],quit:[164,228,152,20],plus:[320,228,20,20]},panel:false,ver:[4,260]};
+}
+
+// ---------------- backgrounds ----------------
+const BGC={};
+function bgStatic(bg,lay){const key=bg+lay;if(BGC[key])return BGC[key];const L=layout(lay);let r;
+  if(bg==='A')r=forgeStatic(L);else if(bg==='B')r=hackStatic(L);else r=serverStatic(L);BGC[key]=r;return r}
+
+function catenary(x0,y0,x1,y1,sag){const pts=[];const n=Math.ceil(Math.hypot(x1-x0,y1-y0));for(let i=0;i<=n;i++){const t=i/n;pts.push([x0+(x1-x0)*t,y0+(y1-y0)*t+sag*4*t*(1-t)])}return pts}
+function drawCable(c,pts,th,col,hi){for(const p of pts){R(c,p[0],p[1],1,th,col)}for(const p of pts){R(c,p[0],p[1],1,1,hi)}}
+
+function forgeStatic(L){const b=new Buf(W,H);const cx=L.cx,cy=L.feet-70;
+  const top=hx('#050907'),bot=hx('#0f1a14');
+  for(let y=0;y<H;y++){const t=Math.floor(Math.min(1,y/196)*8)/8;const col=mix(top,bot,t);for(let x=0;x<W;x++)b.set(x,y,col)}
+  // panels
+  for(let x=0;x<W;x+=40)for(let y=0;y<196;y++){b.set(x,y,hx('#030604'));b.set(x+1,y,hx('#17241d'))}
+  for(const yy of[46,104,160])for(let x=0;x<W;x++){b.set(x,yy,hx('#030604'));b.set(x,yy+1,hx('#152019'))}
+  for(let x=4;x<W;x+=40)for(const yy of[4,50,108,164]){b.set(x,yy,hx('#33463b'));b.set(x+32,yy,hx('#33463b'))}
+  // reactor ring
+  const RO=92,RI=78;
+  for(let y=cy-RO-2;y<=cy+RO+2;y++)for(let x=cx-RO-2;x<=cx+RO+2;x++){const d=Math.hypot(x-cx,y-cy);
+    if(d<=RO&&d>RI){const lit=(y-cy)<0;let col=hx(lit?'#26342c':'#18221c');if(d>RO-1.5)col=hx('#050806');if(d<RI+1.5)col=hx('#0a2914');
+      const a=Math.atan2(y-cy,x-cx);if(Math.abs(((a*12/Math.PI)%2+2)%2-1)<.18&&d<RO-2&&d>RI+2)col=hx(lit?'#3d5446':'#2a3b31');b.set(x,y,col)}
+    else if(d<=RI){const t=d/RI;const band=Math.floor((1-t)*7)/7;const col=mix(hx('#04140a'),hx('#1b8f45'),band*band);b.set(x,y,col)}}
+  // pistons / pillars
+  for(const px of[cx-150,cx+122]){if(px<-30||px>W)continue;for(let y=20;y<196;y++)for(let x=px;x<px+28;x++){const e=x===px||x===px+27;b.set(x,y,hx(e?'#040705':(x<px+6?'#2b3a32':(x>px+21?'#111a15':'#1c2822'))))}
+    for(let y=36;y<180;y+=22)for(let x=px+6;x<px+22;x++){b.set(x,y,hx('#0a120d'));b.set(x,y+1,hx('#0a120d'))}}
+  // floor
+  for(let y=196;y<H;y++){const t=(y-196)/(H-196);for(let x=0;x<W;x++){let col=mix(hx('#17221c'),hx('#0b110d'),t);if(y===196)col=hx('#2f4337');if((y-196)%12===0&&y>196)col=hx('#08100b');if(((x-cx)+((y-196)*((x-cx)/120)))%48===0)col=hx('#0b140f');b.set(x,y,col)}}
+  // green reflection on floor
+  for(let y=197;y<H;y++)for(let x=cx-80;x<cx+80;x++){const d=Math.abs(x-cx)/80;const a=(1-d)*.28*(1-(y-197)/80);if(a>0&&((x+y)%2===0||a>.15))b.blend(x,y,hx('#3dff7a'),Math.max(0,a))}
+  const c=b.done(),x=c.getContext('2d');
+  // cables
+  const cables=[catenary(0,8,cx-RO+6,cy-40,40),catenary(W,14,cx+RO-6,cy-46,34),catenary(cx-110,0,cx-40,cy-RO+4,18),catenary(cx+120,0,cx+44,cy-RO+6,20),catenary(0,150,cx-RO,cy+30,12),catenary(W,140,cx+RO,cy+34,10)];
+  for(const p of cables)drawCable(x,p,3,'#060a08','#24342b');
+  // glow canvas for pulse
+  const g=cv(W,H),gx=g.getContext('2d');for(let y=cy-RI;y<=cy+RI;y++)for(let xx=cx-RI;xx<=cx+RI;xx++){const d=Math.hypot(xx-cx,y-cy);if(d<RI){const t=1-d/RI;const a=Math.floor(t*t*6)/6*.55;if(a>0){gx.fillStyle=`rgba(110,255,160,${a})`;gx.fillRect(xx,y,1,1)}}}
+  return{c,cables,glow:g,cx,cy}}
+
+function hackStatic(L){const b=new Buf(W,H);const cx=L.cx,hz=150;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)b.set(x,y,y<hz?mix(hx('#010302'),hx('#03130a'),Math.floor(y/hz*6)/6):hx('#010402'));
+  // perspective verticals
+  for(let i=-16;i<=16;i++){const bx=cx+i*44;for(let y=hz;y<H;y++){const t=(y-hz)/(H-hz);const x=Math.round(cx+(bx-cx)*t);b.set(x,y,mix(hx('#03130a'),hx('#1c9a4a'),t))}}
+  for(let x=0;x<W;x++)b.set(x,hz,hx('#2fd06a'));
+  const c=b.done();
+  // big Y hologram
+  const Y=["#.....#",".#...#.","..#.#..","...#...",".#####.","...#...","..###.."];const yc=cv(W,H),yx=yc.getContext('2d');const k=13,ox=cx-3.5*k,oy=hz-7*k-8;
+  Y.forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch==='#'){yx.fillStyle='rgba(77,255,136,.16)';yx.fillRect(ox+i*k,oy+j*k,k,k);yx.fillStyle='rgba(77,255,136,.45)';yx.fillRect(ox+i*k,oy+j*k,k,1);yx.fillRect(ox+i*k,oy+j*k,1,k)}}));
+  for(let y=0;y<H;y+=2){yx.clearRect(0,y,W,1)}
+  const cols=[];for(let i=0;i<80;i++)cols.push({x:i*6,sp:18+rnd(i)*40,ph:rnd(i+3)*400,len:6+Math.floor(rnd(i+7)*12)});
+  return{c,yc,cols,cx,hz}}
+
+function serverStatic(L){const b=new Buf(W,H);const cx=L.cx,vy=118,bw=50,fl=cx,fr=W-cx;
+  const Ht=vy/Math.max(fl,fr),Hb=(H-vy)/Math.max(fl,fr);const leds=[];
+  for(let x=0;x<W;x++){const left=x<cx;const f=left?fl:fr;const dx=Math.abs(x-cx);const inBack=dx<bw;
+    const z=inBack?f/bw:f/Math.max(dx,1);const top=vy-f*Ht/z*(f/Math.max(fl,fr))*(Math.max(fl,fr)/f),bot=vy+f*Hb/z*(f/Math.max(fl,fr))*(Math.max(fl,fr)/f);
+    for(let y=0;y<H;y++){let col;
+      if(y<top){const t=y/top;col=mix(hx('#020403'),hx('#0b1410'),t);if(Math.abs(((x-cx)*(vy-0)/(vy-y+1))%60)<1.2)col=hx('#152119')}
+      else if(y>bot){const t=(y-bot)/(H-bot+1);col=mix(hx('#0c1611'),hx('#070c09'),t);const zz=(H-vy)/(y-vy);if(Math.abs((zz*8)%2-1)>.93)col=hx('#040806');if(Math.abs((x-cx)*(1/zz))<10)col=mix(col,hx('#3dff7a'),.25);}
+      else if(inBack){const t=1-dx/bw;col=mix(hx('#0f3a20'),hx('#9dffc0'),Math.pow(t,1.6)*.9)}
+      else{const rack=Math.floor((z-1)/.55);const fr2=((z-1)/.55)%1;const yy=(y-top)/(bot-top);
+        col=hx(fr2<.1?'#050806':(rack%2?'#121a16':'#0f1612'));if(fr2>=.1){if(Math.abs((yy*10)%1)<.06)col=hx('#070b09');}
+        if(fr2>.25&&fr2<.3&&rack<10){const row=Math.floor(yy*10);if(Math.abs((yy*10)%1-.5)<.12&&b){leds.push([x,y,rack,row])}}}
+      b.set(x,y,col)}}
+  const c=b.done();const ls=[];const seen={};for(const l of leds){const k=l[2]+'_'+l[3]+'_'+(l[0]<cx?0:1);if(!seen[k]){seen[k]=1;ls.push({x:l[0],y:l[1],s:Math.max(1,Math.round(3-l[2]*.35)),ph:rnd(l[0]*7+l[1]),amber:rnd(l[0]+l[1]*3)>.85})}}
+  // cable trays
+  const x2=c.getContext('2d');const trays=[catenary(0,10,cx-bw,vy-34,6),catenary(W,10,cx+bw,vy-34,6),catenary(0,24,cx-bw,vy-30,10),catenary(W,26,cx+bw,vy-30,12)];
+  for(const p of trays)drawCable(x2,p,2,'#040705','#1e2c24');
+  return{c,leds:ls,trays,cx,vy,bw}}
+
+function pedestal(c,bg,cx,feet,t,i){
+  if(bg==='A'){R(c,cx-24,feet,48,16,'#050806');R(c,cx-23,feet+1,46,3,'#3a4d42');R(c,cx-23,feet+4,46,11,'#1a2620');R(c,cx-21,feet+8,42,1,'#0a120d');
+    const a=.5+.5*Math.sin(t*2+i);for(let k=0;k<6;k++)R(c,cx-15+k*6,feet+10,3,2,rgb(mix(hx('#14532b'),hx('#7dffaa'),a)))}
+  else if(bg==='B'){const a=.55+.25*Math.sin(t*3+i*2);for(let y=0;y<120;y+=1){const al=(1-y/120)*.16*a;c.fillStyle=`rgba(77,255,136,${al})`;c.fillRect(cx-18,feet-y,36,1)}
+    for(let k=0;k<64;k++){const an=k/64*Math.PI*2;R(c,cx+Math.cos(an)*24,feet+2+Math.sin(an)*5,1,1,rgb(hx('#4dff88'),.5+a*.5))}
+    for(let k=0;k<48;k++){const an=k/48*Math.PI*2;R(c,cx+Math.cos(an)*16,feet+2+Math.sin(an)*3,1,1,'rgba(180,255,210,.7)')}}
+  else{R(c,cx-22,feet,44,15,'#030504');R(c,cx-21,feet+1,42,13,'#141c18');R(c,cx-21,feet+1,42,1,'#2c3d34');
+    for(let k=0;k<5;k++){const on=Math.sin(t*5+k*1.7+i)>0;R(c,cx-16+k*4,feet+6,2,2,on?'#6dffa0':'#163a24')}R(c,cx+6,feet+5,11,4,'#08100b')}}
+
+function drawStatues(c,L,bg,mat,t){const names=['Samugodin','MrYotu04','MettaYT'];
+  names.forEach((n,i)=>{const im=IMG[n+'_'+mat];if(!im||!im.complete)return;const cx=L.xs[i];
+    if(bg==='B')pedestal(c,bg,cx,L.feet,t,i);
+    c.drawImage(im,Math.round(cx-im.width/2),Math.round(L.feet-im.height+6));
+    if(bg!=='B')pedestal(c,bg,cx,L.feet,t,i)})}
+
+function drawBg(c,st,t){const L=layout(st.lay);const S=bgStatic(st.bg,st.lay);c.drawImage(S.c,0,0);
+  if(st.bg==='A'){c.globalAlpha=.55+.45*(0.5+0.5*Math.sin(t*1.6));c.drawImage(S.glow,0,0);c.globalAlpha=1;
+    S.cables.forEach((p,i)=>{for(let k=0;k<2;k++){const u=((t*0.35+i*.17+k*.5)%1);const q=p[Math.floor(u*(p.length-1))];R(c,q[0]-1,q[1],3,3,'rgba(77,255,136,.9)');R(c,q[0],q[1]+1,1,1,'#eaffef')}});
+    for(let k=0;k<26;k++){const life=((t*.4+rnd(k))%1);const x=S.cx-60+rnd(k*3)*120+Math.sin(t*2+k)*4;const y=L.feet+6-life*150;R(c,x,y,1,1,life<.7?'#b8ffcf':'#2fae5a')}}
+  else if(st.bg==='B'){
+    for(const col of S.cols){const head=((t*col.sp+col.ph)%(S.hz+120))-20;for(let j=0;j<col.len;j++){const y=Math.floor(head-j*6);if(y<0||y>S.hz-5)continue;const a=1-j/col.len;
+      const gseed=Math.floor(t*3+col.x+j);for(let r=0;r<5;r++)for(let q=0;q<3;q++)if(rnd(gseed*13+r*3+q)>.45){c.fillStyle=j===0?'rgba(220,255,230,.9)':`rgba(60,230,120,${a*.55})`;c.fillRect(col.x+q,y+r,1,1)}}}
+    const fl=.75+.25*Math.sin(t*7)*Math.sin(t*2.3);c.globalAlpha=fl;c.drawImage(S.yc,0,0);c.globalAlpha=1;
+    for(let k=0;k<8;k++){const z=((k+t*.6)%8)/8;const y=Math.round(S.hz+(H-S.hz)*z*z);if(y>S.hz)R(c,0,y,W,1,rgb(hx('#1c9a4a'),.25+z*.6))}}
+  else{S.leds.forEach(l=>{const on=Math.sin(t*(2+l.ph*6)+l.ph*30)>-.2;if(on)R(c,l.x,l.y,l.s,l.s,l.amber?'#ffc24a':'#5dff95')});
+    S.trays.forEach((p,i)=>{const u=((t*.25+i*.3)%1);const q=p[Math.floor(u*(p.length-1))];R(c,q[0],q[1],2,2,'rgba(120,255,170,.9)')});
+    const a=.10+.06*Math.sin(t*1.3);c.fillStyle=`rgba(157,255,192,${a})`;c.fillRect(S.cx-S.bw+6,S.vy-40,S.bw*2-12,80)}
+  drawStatues(c,L,st.bg,st.mat,t);
+  if(st.bg==='B'&&(t%4.3)<.12){const y=Math.floor(rnd(Math.floor(t/4.3))*200);const d=c.getImageData(0,y,W,6);c.putImageData(d,3,y);c.fillStyle='rgba(77,255,136,.18)';c.fillRect(0,y,W,1)}
+  if(L.panel){const g=c.createLinearGradient(0,0,250,0);g.addColorStop(0,'rgba(2,6,4,.88)');g.addColorStop(.75,'rgba(2,6,4,.6)');g.addColorStop(1,'rgba(2,6,4,0)');c.fillStyle=g;c.fillRect(0,0,250,H)}
+  else{const g=c.createLinearGradient(0,196,0,H);g.addColorStop(0,'rgba(2,6,4,0)');g.addColorStop(1,'rgba(2,6,4,.7)');c.fillStyle=g;c.fillRect(0,196,W,H-196)}}
+
+// ---------------- logo ----------------
+const LGC={};
+function logoParts(name){const key=name;if(LGC[key])return LGC[key];
+  const los=maskOf('LOS',2),yog=maskOf('YOGURINES',4),vi=maskOf('VI',5),sub=maskOf(name.toUpperCase(),2);
+  const w=Math.max(yog.width+8+vi.width,sub.width+40);const r={los,yog,vi,sub,w,h:70};LGC[key]=r;return r}
+function outline(x,m,col,px,py){const o=tint(m,col);for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])x.drawImage(o,px+dx,py+dy)}
+function gradFill(m,stops){const c=cv(m.width,m.height),x=c.getContext('2d');x.drawImage(m,0,0);x.globalCompositeOperation='source-in';
+  const g=x.createLinearGradient(0,0,0,m.height);stops.forEach(s=>g.addColorStop(s[0],s[1]));x.fillStyle=g;x.fillRect(0,0,c.width,c.height);return c}
+function drawLogo(c,style,name,ox,oy,center,t){const P=logoParts(name);const bw=P.yog.width+8+P.vi.width;const x0=center?Math.round(ox-bw/2):ox;
+  const yY=16,yV=16+28-35,ySub=50;const xV=x0+P.yog.width+8;const subX=center?Math.round(ox-P.sub.width/2):x0;
+  const glowA=.5+.5*Math.sin(t*2.2);
+  if(style==='A'){
+    for(let d=3;d>=1;d--){c.drawImage(tint(P.yog,d===3?'#020403':'#141d18'),x0,oy+yY+d);c.drawImage(tint(P.los,'#141d18'),x0,oy+d);c.drawImage(tint(P.vi,d===3?'#02100a':'#0b4a24'),xV,oy+yV+d)}
+    outline(c,P.yog,'#020403',x0,oy+yY);outline(c,P.los,'#020403',x0,oy);
+    c.drawImage(gradFill(P.yog,[[0,'#f2f7fa'],[.45,'#aab6bf'],[.5,'#6c7a86'],[1,'#c6d0d8']]),x0,oy+yY);
+    c.drawImage(gradFill(P.los,[[0,'#e2e8ec'],[1,'#8b98a2']]),x0,oy);
+    c.globalAlpha=.18+.22*glowA;for(const[dx,dy]of[[2,0],[-2,0],[0,2],[0,-2],[3,3],[-3,-3],[3,-3],[-3,3]])c.drawImage(tint(P.vi,'#4dff88'),xV+dx,oy+yV+dy);c.globalAlpha=1;
+    outline(c,P.vi,'#020a05',xV,oy+yV);c.drawImage(gradFill(P.vi,[[0,'#d9ffe6'],[.5,'#4dff88'],[1,'#1b9a4a']]),xV,oy+yV);
+    outline(c,P.sub,'#020403',subX,oy+ySub);c.drawImage(tint(P.sub,'#7dffaa'),subX,oy+ySub);
+    R(c,subX-22,oy+ySub+6,16,2,'#2fae5a');R(c,subX+P.sub.width+6,oy+ySub+6,16,2,'#2fae5a')}
+  else if(style==='B'){const glitch=(t%3.1)<.14;
+    const lay=(m,px,py,col)=>{c.globalAlpha=.7;c.drawImage(tint(m,'#ff3df2'),px-2,py);c.drawImage(tint(m,'#3df2ff'),px+2,py);c.globalAlpha=1;outline(c,m,'#011208',px,py);c.drawImage(tint(m,col),px,py)};
+    lay(P.los,x0,oy,'#4dff88');lay(P.yog,x0,oy+yY,'#4dff88');
+    c.globalAlpha=.25+.25*glowA;for(const[dx,dy]of[[2,0],[-2,0],[0,2],[0,-2]])c.drawImage(tint(P.vi,'#4dff88'),xV+dx,oy+yV+dy);c.globalAlpha=1;lay(P.vi,xV,oy+yV,'#eafff1');
+    lay(P.sub,subX,oy+ySub,'#b8ffcf');
+    for(let y=oy;y<oy+66;y+=2){c.fillStyle='rgba(0,0,0,.18)';c.fillRect(x0-4,y,bw+8,1)}
+    if(glitch){const seed=Math.floor(t/3.1);for(let k=0;k<3;k++){const yy=oy+Math.floor(rnd(seed*5+k)*60);const d=c.getImageData(x0-4,yy,bw+8,3);c.putImageData(d,x0-4+(rnd(seed+k)>.5?4:-4),yy)}}}
+  else{const dots=(m)=>{const cc=cv(m.width,m.height),x=cc.getContext('2d');x.drawImage(m,0,0);x.globalCompositeOperation='source-in';x.fillStyle='#121a16';x.fillRect(0,0,cc.width,cc.height);
+      x.globalCompositeOperation='source-atop';x.fillStyle='#1f6b3c';for(let yy=1;yy<cc.height;yy+=3)for(let xx=(yy%2)+1;xx<cc.width;xx+=3)x.fillRect(xx,yy,1,1);return cc};
+    outline(c,P.yog,'#43f07a',x0,oy+yY);c.drawImage(dots(P.yog),x0,oy+yY);outline(c,P.los,'#43f07a',x0,oy);c.drawImage(dots(P.los),x0,oy);
+    R(c,x0,oy+yY+31,P.yog.width,1,'#1f6b3c');for(let k=0;k<5;k++){const xx=x0+10+k*42;R(c,xx,oy+yY+31,1,5,'#1f6b3c');R(c,xx-1,oy+yY+36,3,2,(Math.sin(t*3+k)>0)?'#6dffa0':'#1f6b3c')}
+    c.globalAlpha=.25+.25*glowA;for(const[dx,dy]of[[2,0],[-2,0],[0,2],[0,-2],[3,3],[-3,-3]])c.drawImage(tint(P.vi,'#4dff88'),xV+dx,oy+yV+dy);c.globalAlpha=1;
+    outline(c,P.vi,'#43f07a',xV,oy+yV);c.drawImage(gradFill(P.vi,[[0,'#ffffff'],[1,'#c9ffe0']]),xV,oy+yV);
+    const sx=subX-8,sw=P.sub.width+16;R(c,sx,oy+ySub-4,sw,22,'#43f07a');R(c,sx+1,oy+ySub-3,sw-2,20,'#07100b');c.drawImage(tint(P.sub,'#e8fff0'),subX,oy+ySub+1)}
+  return{vi:[xV,oy+yV,P.vi.width,P.vi.height]}}
+
+// ---------------- buttons ----------------
+const GEAR=["...###...",".#.###.#.","..#####..","###...###","###...###","###...###","..#####..",".#.###.#.","...###..."];
+const PLUS=["...##...","...##...","...##...","########","########","...##...","...##...","...##..."];
+function icon(c,m,cx,cy,col){const ox=Math.round(cx-m[0].length/2),oy=Math.round(cy-m.length/2);m.forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch==='#')R(c,ox+i,oy+j,1,1,col)}))}
+function drawBtn(c,style,r,label,hov,t,ic){const[x,y,w,h]=r;let tc;
+  if(style==='A'){R(c,x,y,w,h,hov?'#4dff88':'#000');R(c,x+1,y+1,w-2,h-2,hov?'#46525c':'#353e46');R(c,x+1,y+1,w-2,1,hov?'#6d7a86':'#56616b');R(c,x+1,y+1,1,h-2,hov?'#6d7a86':'#56616b');
+    R(c,x+1,y+h-2,w-2,1,'#1f252a');R(c,x+w-2,y+1,1,h-2,'#1f252a');for(let k=0;k<w;k+=7)R(c,x+2+((k*13)%(w-4)),y+3+((k*7)%(h-6)),1,1,hov?'#4f5c66':'#3c464f');tc=hov?'#b9ffd0':'#e8efe9'}
+  else if(style==='B'){c.fillStyle=hov?'rgba(20,110,55,.55)':'rgba(4,28,14,.6)';c.fillRect(x+1,y+1,w-2,h-2);const oc=hov?'#a6ffc6':'#2fd06a';
+    R(c,x+2,y,w-4,1,oc);R(c,x+2,y+h-1,w-4,1,oc);R(c,x,y+2,1,h-4,oc);R(c,x+w-1,y+2,1,h-4,oc);R(c,x+1,y+1,1,1,oc);R(c,x+w-2,y+1,1,1,oc);R(c,x+1,y+h-2,1,1,oc);R(c,x+w-2,y+h-2,1,1,oc);
+    if(hov){for(let yy=y+2;yy<y+h-2;yy+=2){c.fillStyle='rgba(120,255,170,.12)';c.fillRect(x+2,yy,w-4,1)}const sy=y+2+Math.floor((t*30)%(h-4));R(c,x+2,sy,w-4,1,'rgba(200,255,220,.35)')}
+    tc=hov?'#ffffff':'#5dff95'}
+  else{R(c,x,y,w,h,hov?'#4dff88':'#2b3631');R(c,x+1,y+1,w-2,h-2,'#111714');R(c,x+1,y+1,w-2,1,'#1d2621');
+    if(!ic){const ly=y+Math.floor(h/2)-1;R(c,x+5,ly,3,3,hov?'#6dffa0':'#1d3b29');if(hov){c.fillStyle='rgba(109,255,160,.35)';c.fillRect(x+4,ly-1,5,5)}
+      const tl=w-24,len=hov?Math.min(tl,Math.floor(((t*2)%1.3)*tl*1.2)):Math.floor(tl*.25);R(c,x+12,y+h-3,tl,1,'#16261d');R(c,x+12,y+h-3,len,1,hov?'#4dff88':'#1f5c37')}
+    tc=hov?'#ffffff':'#cfe3d6'}
+  if(ic)icon(c,ic,x+w/2,y+h/2,tc);else txtC(c,label,x+w/2,y+Math.floor((h-7)/2),tc,1,style==='B'?'#03140a':'#111')}
+
+// ---------------- dev mode state ----------------
+const DEV={open:0,pw:'',err:0,field:null,ip:'play.yogurines.net',playTxt:'Jugar',quitTxt:'Salir',plus:true,toast:null,toastT:0,viClicks:[],holdT:null};
+
+function drawMenu(c,st,t,hover,interactive){const L=layout(st.lay);drawBg(c,st,t);
+  const lg=drawLogo(c,st.logo,st.name.startsWith('Otro')?'Yogurines':st.name,L.logo.x,L.logo.y,L.logo.center,t);
+  const B=L.btn;const hits={};
+  hits.play=B.play;hits.gear=B.gear;hits.quit=DEV.plus?B.quit:[B.quit[0],B.quit[1],B.quit[2]+24,B.quit[3]];if(DEV.plus)hits.plus=B.plus;hits.vi=lg.vi;
+  drawBtn(c,st.btn,hits.play,DEV.playTxt,hover==='play',t);drawBtn(c,st.btn,hits.gear,'',hover==='gear',t,GEAR);drawBtn(c,st.btn,hits.quit,DEV.quitTxt,hover==='quit',t);if(DEV.plus)drawBtn(c,st.btn,hits.plus,'',hover==='plus',t,PLUS);
+  txt(c,'Los Yogurines VI · Forge 1.20.1',L.ver[0],L.ver[1],'#6f8a79',1);const v='v1.0';txt(c,v,W-tw(v)-4,260,'#6f8a79',1);
+  if(DEV.holdT&&interactive){const p=Math.min(1,(performance.now()-DEV.holdT)/3000);const[gx,gy,gw]=B.gear;R(c,gx,gy-4,gw,2,'#050806');R(c,gx,gy-4,Math.round(gw*p),2,'#4dff88')}
+  if(interactive){if(DEV.toast&&performance.now()-DEV.toastT<2600){const s=DEV.toast;const w=tw(s)+16;R(c,(W-w)/2,12,w,17,'#4dff88');R(c,(W-w)/2+1,13,w-2,15,'#07100b');txtC(c,s,W/2,17,'#e8fff0')}
+    if(DEV.open)drawDev(c,st,t,hits,hover)}
+  return hits}
+
+function panel(c,x,y,w,h,title){c.fillStyle='rgba(0,0,0,.6)';c.fillRect(0,0,W,H);R(c,x,y,w,h,'#4dff88');R(c,x+1,y+1,w-2,h-2,'#08110c');R(c,x+1,y+1,w-2,13,'#103a20');txt(c,title,x+6,y+4,'#d9ffe6',1)}
+function field(c,r,label,val,active,t){const[x,y,w,h]=r;txt(c,label,x,y-10,'#93c9a6');R(c,x,y,w,h,active?'#4dff88':'#2b4a37');R(c,x+1,y+1,w-2,h-2,'#020604');
+  txt(c,val+(active&&Math.floor(t*2)%2?'_':''),x+4,y+Math.floor((h-7)/2),'#e8fff0')}
+function drawDev(c,st,t,hits,hover){
+  if(DEV.open===1){const x=140,y=82,w=200,h=96;panel(c,x,y,w,h,'Modo desarrollador');txt(c,'Contraseña:',x+10,y+24,'#93c9a6');
+    hits.pwf=[x+10,y+36,w-20,16];R(c,x+10,y+36,w-20,16,DEV.err?'#ff5a5a':'#4dff88');R(c,x+11,y+37,w-22,14,'#020604');txt(c,'*'.repeat(DEV.pw.length)+(Math.floor(t*2)%2?'_':''),x+15,y+41,'#e8fff0');
+    if(DEV.err)txt(c,'Contraseña incorrecta',x+10,y+56,'#ff8a8a');
+    hits.ok=[x+10,y+70,86,18];hits.cancel=[x+104,y+70,86,18];drawBtn(c,st.btn,hits.ok,'Entrar',hover==='ok',t);drawBtn(c,st.btn,hits.cancel,'Cancelar',hover==='cancel',t)}
+  else if(DEV.open===2){const x=96,y=34,w=288,h=206;panel(c,x,y,w,h,'Modo desarrollador · Editor');
+    hits.f_ip=[x+10,y+32,w-20,16];field(c,hits.f_ip,'IP del servidor (botón Jugar)',DEV.ip,DEV.field==='ip',t);
+    hits.f_play=[x+10,y+66,128,16];field(c,hits.f_play,'Texto de Jugar',DEV.playTxt,DEV.field==='playTxt',t);
+    hits.f_quit=[x+150,y+66,128,16];field(c,hits.f_quit,'Texto de Salir',DEV.quitTxt,DEV.field==='quitTxt',t);
+    txt(c,'Botón + (solitario)',x+10,y+92,'#93c9a6');hits.tplus=[x+10,y+102,60,16];drawBtn(c,st.btn,hits.tplus,DEV.plus?'Visible':'Oculto',hover==='tplus',t);
+    txt(c,'Contraseña',x+150,y+92,'#93c9a6');hits.tpw=[x+150,y+102,128,16];drawBtn(c,st.btn,hits.tpw,'Cambiar...',hover==='tpw',t);
+    txt(c,'Los cambios se guardan online y',x+10,y+128,'#6f8a79');txt(c,'les llegan a todos al abrir el juego.',x+10,y+138,'#6f8a79');
+    hits.save=[x+10,y+176,130,20];hits.exit=[x+148,y+176,130,20];drawBtn(c,st.btn,hits.save,'Guardar',hover==='save',t);drawBtn(c,st.btn,hits.exit,'Salir del modo dev',hover==='exit',t)}}
+
+// ---------------- main preview ----------------
+const pv=document.getElementById('prev'),px=pv.getContext('2d');let pHits={},pHover=null;
+function mpos(e,cnv){const r=cnv.getBoundingClientRect();return[(e.clientX-r.left)*cnv.width/r.width,(e.clientY-r.top)*cnv.height/r.height]}
+function hitAt(h,x,y){let f=null;for(const k in h){const[a,b,w,hh]=h[k];if(x>=a&&x<a+w&&y>=b&&y<b+hh)f=k}return f}
+const MENU_KEYS=['play','gear','quit','plus','vi'];
+pv.addEventListener('mousemove',e=>{const[x,y]=mpos(e,pv);let h=hitAt(pHits,x,y);if(DEV.open&&MENU_KEYS.includes(h))h=null;if(!DEV.open&&!MENU_KEYS.includes(h))h=null;pHover=h;pv.style.cursor=h&&h!=='vi'?'pointer':'default'});
+pv.addEventListener('mouseleave',()=>{pHover=null;DEV.holdT=null});
+function toast(s){DEV.toast=s;DEV.toastT=performance.now()}
+pv.addEventListener('mousedown',e=>{pv.focus();const[x,y]=mpos(e,pv);const h=hitAt(pHits,x,y);if(!DEV.open&&h==='gear')DEV.holdT=performance.now()});
+pv.addEventListener('mouseup',()=>{if(DEV.holdT){const d=performance.now()-DEV.holdT;DEV.holdT=null;if(d<3000&&!DEV.open)toast('Abre los ajustes de Minecraft')}});
+pv.addEventListener('click',e=>{const[x,y]=mpos(e,pv);const h=hitAt(pHits,x,y);
+  if(!DEV.open){if(h==='play')toast('Conectando a '+DEV.ip+'...');else if(h==='quit')toast('Cierra el juego');else if(h==='plus')toast('Abre la lista de mundos en solitario');
+    else if(h==='vi'){const now=performance.now();DEV.viClicks=DEV.viClicks.filter(v=>now-v<2500);DEV.viClicks.push(now);if(DEV.viClicks.length>=5){DEV.viClicks=[];DEV.open=1;DEV.pw='';DEV.err=0}}return}
+  if(DEV.open===1){if(h==='ok')tryPw();else if(h==='cancel'){DEV.open=0}}
+  else if(DEV.open===2){DEV.field=null;if(h==='f_ip')DEV.field='ip';else if(h==='f_play')DEV.field='playTxt';else if(h==='f_quit')DEV.field='quitTxt';else if(h==='tplus')DEV.plus=!DEV.plus;
+    else if(h==='tpw')toast('Aquí pondrías la contraseña nueva');else if(h==='save'){DEV.open=0;toast('Guardado')}else if(h==='exit')DEV.open=0}});
+setInterval(()=>{if(DEV.holdT&&performance.now()-DEV.holdT>=3000){DEV.holdT=null;DEV.open=1;DEV.pw='';DEV.err=0}},100);
+function tryPw(){if(DEV.pw==='yogur'){DEV.open=2;DEV.field=null}else{DEV.err=1;DEV.pw=''}}
+pv.addEventListener('keydown',e=>{if(!DEV.open&&e.ctrlKey&&e.shiftKey&&(e.key==='D'||e.key==='d')){e.preventDefault();DEV.open=1;DEV.pw='';DEV.err=0;return}
+  if(DEV.open===1){if(e.key==='Enter')tryPw();else if(e.key==='Escape')DEV.open=0;else if(e.key==='Backspace')DEV.pw=DEV.pw.slice(0,-1);else if(e.key.length===1&&DEV.pw.length<16){DEV.pw+=e.key;DEV.err=0}e.preventDefault()}
+  else if(DEV.open===2){if(e.key==='Escape'){DEV.open=0;e.preventDefault();return}if(!DEV.field)return;const f=DEV.field;
+    if(e.key==='Backspace')DEV[f]=DEV[f].slice(0,-1);else if(e.key==='Enter')DEV.field=null;else if(e.key.length===1&&DEV[f].length<(f==='ip'?30:14))DEV[f]+=e.key;e.preventDefault()}});
+
+// ---------------- thumbnails ----------------
+function thumbs(){document.querySelectorAll('canvas.th').forEach(cn=>{const s={...ST,bg:cn.dataset.v};drawMenuStatic(cn,s)});
+  document.querySelectorAll('canvas.ly').forEach(cn=>{const s={...ST,lay:cn.dataset.v};drawMenuStatic(cn,s)})}
+function drawMenuStatic(cn,s){const c=cn.getContext('2d');const sv=DEV.open;DEV.open=0;drawMenu(c,s,1.3,null,false);DEV.open=sv}
+const mts=[...document.querySelectorAll('canvas.mt')];
+function drawMats(){mts.forEach(cn=>{const c=cn.getContext('2d');const g=c.createLinearGradient(0,0,0,220);g.addColorStop(0,'#06100a');g.addColorStop(1,'#0f2618');c.fillStyle=g;c.fillRect(0,0,360,220);
+  R(c,0,196,360,24,'#0b140f');R(c,0,196,360,1,'#2fae5a');
+  ['Samugodin','MrYotu04','MettaYT'].forEach((n,i)=>{const im=IMG[n+'_'+cn.dataset.v+'_5'];if(!im)return;const sc=.72;const w=im.width*sc,h=im.height*sc;c.imageSmoothingEnabled=false;c.drawImage(im,Math.round(62+i*118-w/2),Math.round(202-h),Math.round(w),Math.round(h))})})}
+const lgs=[...document.querySelectorAll('canvas.lg')];let lgHover=null;
+function drawLogos(t){lgs.forEach(cn=>{const c=cn.getContext('2d');c.fillStyle='#050a07';c.fillRect(0,0,300,90);drawLogo(c,cn.dataset.v,ST.name.startsWith('Otro')?'Yogurines':ST.name,150,10,true,t)})}
+const bts=[...document.querySelectorAll('canvas.bt')];const btHover=new Map();
+bts.forEach(cn=>{cn.addEventListener('mousemove',e=>{const[x,y]=mpos(e,cn);const hs=btnRects();btHover.set(cn,hitAt(hs,x,y))});cn.addEventListener('mouseleave',()=>btHover.set(cn,null))});
+function btnRects(){return{play:[20,8,200,20],gear:[20,34,20,20],quit:[44,34,152,20],plus:[200,34,20,20]}}
+function drawBtns(t){bts.forEach(cn=>{const c=cn.getContext('2d');const g=c.createLinearGradient(0,0,0,66);g.addColorStop(0,'#0a1a10');g.addColorStop(1,'#04080a');c.fillStyle=g;c.fillRect(0,0,240,66);
+  const h=btHover.get(cn);const r=btnRects();drawBtn(c,cn.dataset.v,r.play,'Jugar',h==='play',t);drawBtn(c,cn.dataset.v,r.gear,'',h==='gear',t,GEAR);drawBtn(c,cn.dataset.v,r.quit,'Salir',h==='quit',t);drawBtn(c,cn.dataset.v,r.plus,'',h==='plus',t,PLUS)})}
+
+// ---------------- pause ----------------
+let GAME=null;
+function gameBg(){if(GAME)return GAME;const b=new Buf(W,H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){let col=mix(hx('#78a7ff'),hx('#c0d8ff'),y/150);b.set(x,y,col)}
+  const hill=x=>150+Math.round(Math.sin(x/37)*10+Math.sin(x/13)*4);
+  for(let x=0;x<W;x++){const h=hill(Math.floor(x/8)*8);for(let y=h;y<H;y++){let col;if(y<h+4)col=hx(rnd(x*3+y)>.5?'#5f9f35':'#6aa83c');else if(y<h+30)col=hx(rnd(x+y*7)>.6?'#7a5a3a':'#86603d');else col=hx(rnd(x*5+y)>.5?'#7d7d7d':'#717171');b.set(x,y,col)}}
+  for(const tx of[60,190,330,420]){const h=hill(tx);for(let y=h-30;y<h;y++)for(let x=tx;x<tx+6;x++)b.set(x,y,hx('#6b4f2c'));for(let y=h-56;y<h-24;y++)for(let x=tx-14;x<tx+20;x++)if(rnd(x*y)>.12)b.set(x,y,hx(rnd(x+y)>.5?'#3f7d22':'#356b1c'))}
+  GAME=b.done();return GAME}
+const PB=[['Volver al juego',138,64,204],['Logros',138,88,98],['Estadísticas',244,88,98],['Dar opinión',138,112,98],['Informar fallos',244,112,98],['Opciones...',138,136,98],['Abrir en LAN',244,136,98],['Guardar y salir al título',138,160,204]];
+function vanBtn(c,style,x,y,w,h,label,hov){
+  if(style==='A'||style==='B'){const dark=style==='B';R(c,x,y,w,h,hov?(dark?'#4dff88':'#7dffaa'):'#000');const base=dark?'#4b524e':'#6f6f6f';R(c,x+1,y+1,w-2,h-2,base);
+    for(let k=0;k<w*h/9;k++){const xx=x+1+Math.floor(rnd(k*3+x)*(w-2)),yy=y+1+Math.floor(rnd(k*7+y)*(h-2));R(c,xx,yy,1,1,dark?(rnd(k)>.5?'#434a46':'#555d58'):(rnd(k)>.5?'#666':'#7a7a7a'))}
+    R(c,x+1,y+1,w-2,1,dark?'#6b746f':'#a4a4a4');R(c,x+1,y+1,1,h-2,dark?'#6b746f':'#a4a4a4');R(c,x+1,y+h-2,w-2,1,dark?'#2f3532':'#575757');R(c,x+w-2,y+1,1,h-2,dark?'#2f3532':'#575757');
+    if(hov){R(c,x+1,y+1,w-2,1,dark?'#4dff88':'#7dffaa');R(c,x+1,y+h-2,w-2,1,dark?'#2fae5a':'#4ccf7a')}
+    txtC(c,label,x+w/2,y+6,hov?(dark?'#b9ffd0':'#ffffa0'):'#e0e0e0',1,'#3f3f3f')}
+  else{R(c,x,y,w,h,'#000');R(c,x+1,y+1,w-2,h-2,hov?'#46525c':'#353e46');R(c,x+1,y+1,w-2,1,'#5c6772');R(c,x+1,y+h-2,w-2,1,'#1f252a');
+    const cc=hov?'#a6ffc6':'#4dff88';R(c,x,y,3,1,cc);R(c,x,y,1,3,cc);R(c,x+w-3,y+h-1,3,1,cc);R(c,x+w-1,y+h-3,1,3,cc);
+    txtC(c,label,x+w/2,y+6,hov?'#b9ffd0':'#e8efe9',1,'#111')}}
+const pzs=[...document.querySelectorAll('canvas.pz')];const pzHover=new Map();
+pzs.forEach(cn=>{cn.addEventListener('mousemove',e=>{let[x,y]=mpos(e,cn);x+=120;y+=30;let f=null;PB.forEach((b,i)=>{if(x>=b[1]&&x<b[1]+b[3]&&y>=b[2]&&y<b[2]+20)f=i});pzHover.set(cn,f)});cn.addEventListener('mouseleave',()=>pzHover.set(cn,null))});
+function drawPause(){pzs.forEach(cn=>{const c=cn.getContext('2d');c.setTransform(1,0,0,1,-120,-30);c.drawImage(gameBg(),0,0);const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(16,16,16,.75)');g.addColorStop(1,'rgba(16,16,16,.82)');c.fillStyle=g;c.fillRect(0,0,W,H);
+  const s=cn.dataset.v;txtC(c,'Menú del juego',W/2,40,'#ffffff',1,'#3f3f3f');if(s==='C'){R(c,200,50,80,1,'#4dff88')}
+  PB.forEach((b,i)=>vanBtn(c,s,b[1],b[2],b[3],20,b[0],pzHover.get(cn)===i));c.setTransform(1,0,0,1,0,0)})}
+const obs=[...document.querySelectorAll('canvas.ob')];
+function tile(kind){const b=new Buf(16,16);for(let y=0;y<16;y++)for(let x=0;x<16;x++){let col;
+  if(kind==='dirt'){const r=rnd(x*31+y*17);col=hx(r>.8?'#593d29':r>.55?'#79553a':r>.25?'#866043':'#b9855c')}
+  else if(kind==='metal'){col=hx((x===0||y===0)?'#0c110e':(x===15||y===15)?'#2a3530':'#1a221e');if((x===2||x===13)&&(y===2||y===13))col=hx('#3d4c44');if(rnd(x*7+y*3)>.92)col=hx('#202a25')}
+  else{col=hx((x===0||y===0)?'#0f3a20':'#050a07');if(x===0&&y===0)col=hx('#1f6b3c')}b.set(x,y,col)}return b.done()}
+function drawOpts(){obs.forEach(cn=>{const c=cn.getContext('2d');const tl=tile(cn.dataset.v);c.imageSmoothingEnabled=false;for(let y=0;y<135;y+=16)for(let x=0;x<240;x+=16)c.drawImage(tl,x,y);
+  if(cn.dataset.v==='dirt'){c.fillStyle='rgba(0,0,0,.75)';c.fillRect(0,0,240,135)}else if(cn.dataset.v==='metal'){c.fillStyle='rgba(0,0,0,.25)';c.fillRect(0,0,240,135)}
+  txtC(c,'Opciones',120,10,'#fff',1,'#3f3f3f');vanBtn(c,'A',20,30,98,20,'Campo de visión',false);vanBtn(c,'A',122,30,98,20,'Música y sonido',false);vanBtn(c,'A',20,54,98,20,'Gráficos...',false);vanBtn(c,'A',122,54,98,20,'Controles...',false);vanBtn(c,'A',70,108,100,20,'Listo',false)})}
+
+// ---------------- choices ----------------
+const sel={};
+document.querySelectorAll('[data-group]').forEach(gr=>{gr.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+  gr.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');sel[gr.dataset.group]=o.dataset.val;
+  const k=gr.dataset.key;if(k in ST){let v=o.dataset.val;if(k==='optbg')v={'Tierra de siempre':'dirt','Placas de metal':'metal','Rejilla verde':'grid'}[v];ST[k]=v;if(k!=='dev')thumbs()}
+  upd()}))});
+function upd(){const n=Object.keys(sel).length,tot=document.querySelectorAll('[data-group]').length;document.getElementById('count').textContent=`${n}/${tot} elegidas`;
+  const names={A:'',B:'',C:''};document.getElementById('curbar').innerHTML=`<span class="chip">Nombre: ${ST.name}</span><span class="chip">Fondo ${ST.bg}</span><span class="chip">Estatuas: ${ST.mat}</span><span class="chip">Logo ${ST.logo}</span><span class="chip">Botones ${ST.btn}</span><span class="chip">${ST.lay==='C'?'Centrada':'Lateral'}</span>`}
+function txtOut(){let s='Elecciones Yogurines VI (menú):\n';document.querySelectorAll('[data-group]').forEach(g=>{s+=`- ${g.dataset.group}: ${sel[g.dataset.group]||'(sin elegir)'}\n`});return s}
+document.getElementById('copy').onclick=async()=>{const o=document.getElementById('out');o.value=txtOut();o.style.display='block';try{await navigator.clipboard.writeText(o.value);document.getElementById('copy').textContent='¡Copiado!'}catch(e){o.select();document.getElementById('copy').textContent='Selecciona y copia'}};
+document.getElementById('show').onclick=()=>{const o=document.getElementById('out');o.value=txtOut();o.style.display=o.style.display==='block'?'none':'block'};
+
+// ---------------- loop ----------------
+let started=false;
+function frame(ts){const t=ts/1000;if(ready>=Object.keys(STAT).length){
+  if(!started){started=true;thumbs();drawMats()}
+  pHits=drawMenu(px,ST,t,pHover,true);drawLogos(t);drawBtns(t);drawPause()}
+  requestAnimationFrame(frame)}
+upd();drawOpts();requestAnimationFrame(frame);
+</script>
+</body>
+</html>

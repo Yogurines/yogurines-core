@@ -19,9 +19,10 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = YogurinesCore.MOD_ID, value = Dist.CLIENT)
 public final class ClientEvents {
 
-    /** Cambia el menú principal de Minecraft por el de Los Yogurines VI. */
+    /** Cambia el menú principal de Minecraft por el de Los Yogurines VI y pone la rejilla animada. */
     @SubscribeEvent
     public static void onOpen(ScreenEvent.Opening e) {
+        GridTexture.ensure();
         if (e.getNewScreen() instanceof TitleScreen) e.setNewScreen(new YogurinesTitleScreen());
     }
 

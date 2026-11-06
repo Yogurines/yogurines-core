@@ -6,8 +6,8 @@ Mod de estilo de **Los Yogurines VI: Overclock** para Minecraft 1.20.1 (Forge). 
 
 - **Menú principal propio**: fondo animado en pixel art con las estatuas de titanio de los tres fundadores (MrYotu04, Samugodin y MettaYT). Cada vez que se abre el juego toca uno de los tres fondos al azar: la forja, el núcleo hackeado o la sala de servidores.
 - **Botones**: Jugar (entra directo al server), Salir, engranaje (ajustes de Minecraft) y + (mundos en solitario).
-- **Modo desarrollador escondido**: en el menú, `Ctrl + Shift + D`. Pide contraseña (la de fábrica es `overclock`, cámbiala desde el propio editor). Desde ahí se cambia la IP, los textos de los botones y si se ve el +.
-- **Pausa y ajustes**: los botones normales pasan a estilo "vanilla oscuro" con borde verde al pasar el ratón, y el fondo de los ajustes es una rejilla verde.
+- **Modo desarrollador escondido**: en el menú, `Ctrl + Shift + D`. Pide la contraseña de los desarrolladores (se puede cambiar desde el propio editor). Desde ahí se cambia la IP, los textos de los botones y si se ve el +.
+- **Pausa y ajustes**: los botones normales pasan a estilo "vanilla oscuro" con borde verde al pasar el ratón, y el fondo de los ajustes y de crear mundo es una rejilla verde animada.
 
 ## Cómo llega la IP a todos
 

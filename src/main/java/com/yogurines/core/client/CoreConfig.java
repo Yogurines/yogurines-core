@@ -26,14 +26,16 @@ import java.util.HexFormat;
 public final class CoreConfig {
     private static final Logger LOG = LoggerFactory.getLogger("yogurines_core");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    public static final String DEFAULT_PASSWORD = "overclock";
+    /** Hash de la contraseña de fábrica (no se guarda la contraseña en texto, el repo es público). */
+    public static final String DEFAULT_HASH = "7b8c96d66c877e69692d2e170bb5b591823672dbbd39324cec752e03a5eb51a1";
+    private static final String OLD_HASH = "d4f1937125405fd86c04c2a5c7671b01f2acea94d732d89f54e5aad2441458b4";
     public static final String REPO = "Yogurines/yogurines-core";
 
     public String ip = "";
     public String playText = "Jugar";
     public String quitText = "Salir";
     public boolean showPlus = true;
-    public String passHash = sha256(DEFAULT_PASSWORD);
+    public String passHash = DEFAULT_HASH;
     public String onlineUrl = "https://raw.githubusercontent.com/" + REPO + "/main/server.json";
 
     private static CoreConfig instance = new CoreConfig();
@@ -56,7 +58,7 @@ public final class CoreConfig {
         } catch (Exception e) {
             LOG.warn("No se pudo leer yogurines_core.json", e);
         }
-        if (instance.passHash == null || instance.passHash.isEmpty()) instance.passHash = sha256(DEFAULT_PASSWORD);
+        if (instance.passHash == null || instance.passHash.isEmpty() || instance.passHash.equals(OLD_HASH)) instance.passHash = DEFAULT_HASH;
         save();
     }
 

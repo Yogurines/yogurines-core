@@ -44,10 +44,19 @@ public final class MenuRenderer {
     private DynamicTexture tex;
     private boolean ok;
 
+    private long lastTry = -1;
+    private int tries;
+
     public static MenuRenderer get() {
-        if (instance == null) {
-            instance = new MenuRenderer();
-            instance.init();
+        if (instance == null) instance = new MenuRenderer();
+        // Al arrancar el juego el menú se dibuja mientras aún se cargan los recursos:
+        // si todavía no están, se vuelve a intentar cada segundo en vez de rendirse.
+        if (!instance.ok) {
+            long now = System.currentTimeMillis();
+            if (instance.lastTry < 0 || now - instance.lastTry > 1000) {
+                instance.lastTry = now;
+                instance.init();
+            }
         }
         return instance;
     }
@@ -117,11 +126,14 @@ public final class MenuRenderer {
             serverCx = d.getAsJsonObject("server").get("cx").getAsInt();
             serverVy = d.getAsJsonObject("server").get("vy").getAsInt();
             serverBw = d.getAsJsonObject("server").get("bw").getAsInt();
-            tex = new DynamicTexture(W, H, false);
-            Minecraft.getInstance().getTextureManager().register(TEX, tex);
+            if (tex == null) {
+                tex = new DynamicTexture(W, H, false);
+                Minecraft.getInstance().getTextureManager().register(TEX, tex);
+            }
             ok = true;
+            LOG.info("Fondo del menú cargado (fondo {})", BG);
         } catch (Exception e) {
-            LOG.error("No se pudo cargar el fondo del menú", e);
+            if (++tries <= 3 || tries % 30 == 0) LOG.warn("Fondo del menú aún no disponible (intento {}): {}", tries, e.toString());
         }
     }
 
@@ -180,6 +192,15 @@ public final class MenuRenderer {
 
     public void render(double t) {
         if (!ok) return;
+        try {
+            renderFrame(t);
+        } catch (Exception e) {
+            LOG.error("Error dibujando el fondo del menú", e);
+            ok = false;
+        }
+    }
+
+    private void renderFrame(double t) {
         System.arraycopy(bgStatic.px, 0, buf, 0, buf.length);
         for (int i = 0; i < buf.length; i++) buf[i] |= 0xFF000000;
         switch (BG) {
